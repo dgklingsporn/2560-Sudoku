@@ -1,4 +1,16 @@
-// Declarations and functions for project #4
+/*
+Sudoku Solver - Part A
+EECE 2560
+4/13/26
+Group ID + #: ROBKLISYGRE 10
+board.cpp
+   This file implements the board class for 
+   a Sudoku puzzle. It handles reading the board 
+   , tracking conflicts, printing the board and
+   conflicts, clearing, and checking if the board is solved.
+
+*/
+
 
 #include <iostream>
 #include <limits.h>
@@ -287,7 +299,7 @@ int main()
 {
    ifstream fin;
 
-   string fileName = "sudoku2.txt"; // change if needed
+   string fileName = "sudoku1.txt";
 
    fin.open(fileName.c_str());
    if (!fin)
