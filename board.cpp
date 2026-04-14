@@ -34,6 +34,9 @@ class board
       void print();
       bool isBlank(int, int);
       ValueType getCell(int, int);
+
+      void clearCell(int, int);
+      bool isSolved();
       
    private:
 
@@ -41,11 +44,18 @@ class board
       // dimension, i.e., they are each (BoardSize+1) * (BoardSize+1)
 
       matrix<ValueType> value;
+
+// added for conflict tracking
+      matrix<bool> rowUsed;
+      matrix<bool> colUsed;
+      matrix<bool> squareUsed;
 };
 
 board::board(int sqSize)
    : value(BoardSize+1,BoardSize+1)
-// Board constructor
+   , rowUsed(BoardSize+1, BoardSize+1, false),
+     colUsed(BoardSize+1, BoardSize+1, false),
+     squareUsed(BoardSize+1, BoardSize+1, false)
 {
    clear();
 }
@@ -57,6 +67,14 @@ void board::clear()
       for (int j = 1; j <= BoardSize; j++)
       {
          value[i][j] = Blank;
+      }
+	// reset conflict trackers
+   for (int i = 1; i <= BoardSize; i++)
+      for (int j = 1; j <= BoardSize; j++)
+      {
+         rowUsed[i][j] = false;
+         colUsed[i][j] = false;
+         squareUsed[i][j] = false;
       }
 }
 
@@ -72,9 +90,17 @@ void board::initialize(ifstream &fin)
 	    {
 	       fin >> ch;
 
-          // If the read char is not Blank
-	      if (ch != '.')
-             setCell(i,j,ch-'0');   // Convert char to int
+          if (ch != '.')
+         {
+            int val = ch - '0';
+            value[i][j] = val;
+
+            // update conflict tracking
+            int sq = squareNumber(i, j);
+            rowUsed[i][val] = true;
+            colUsed[j][val] = true;
+            squareUsed[sq][val] = true;
+         }
         }
 }
 
@@ -148,6 +174,84 @@ void board::print()
    cout << endl;
 }
 
+// Clear cell implementation
+void board::clearCell(int i, int j)
+{
+   if (i < 1 || i > BoardSize || j < 1 || j > BoardSize)
+      throw rangeError("bad value in clearCell");
+
+   if (!isBlank(i, j))
+   {
+      int val = value[i][j];
+      int sq = squareNumber(i, j);
+
+      // Update conflict trackers
+      rowUsed[i][val] = false;
+      colUsed[j][val] = false;
+      squareUsed[sq][val] = false;
+
+      // Clear value
+      value[i][j] = Blank;
+   }
+}
+
+// check if solved
+bool board::isSolved()
+{
+   for (int i = 1; i <= BoardSize; i++)
+   {
+      for (int j = 1; j <= BoardSize; j++)
+      {
+         if (isBlank(i, j))
+         {
+            cout << "Board is NOT solved." << endl;
+            return false;
+         }
+      }
+   }
+
+   cout << "Board is solved!" << endl;
+   return true;
+}
+
+int main()
+{
+   ifstream fin;
+   
+   string fileName = "sudoku.txt";
+
+   fin.open(fileName.c_str());
+   if (!fin)
+   {
+      cerr << "Cannot open " << fileName << endl;
+      exit(1);
+   }
+
+   try
+   {
+      board b1(SquareSize);
+
+      while (fin && fin.peek() != 'Z')
+      {
+         b1.initialize(fin);
+         b1.print();
+         b1.printConflicts();
+
+         // ===== [ADDED: CALL PART 5 FUNCTION] =====
+         b1.isSolved();
+         // =========================================
+      }
+   }
+   catch  (indexRangeError &ex)
+   {
+      cout << ex.what() << endl;
+      exit(1);
+   }
+}
+
+
+
+
 int main()
 {
    ifstream fin;
@@ -170,7 +274,7 @@ int main()
       {
 	 b1.initialize(fin);
 	 b1.print();
-	 b1.printConflicts();
+	 b1.printConflicts(); //note: it’s not implemented yet, so the code will not compile until you add that.
       }
    }
    catch  (indexRangeError &ex)
