@@ -194,7 +194,18 @@ void board::clearCell(int i, int j)
       value[i][j] = Blank;
    }
 }
-
+void board::setCell(int i, int j, int val)
+{
+   if (i < 1 || i > BoardSize || j < 1 || j > BoardSize)
+      throw rangeError("bad value in setCell");
+   else
+   {
+      value[i][j] = val;
+      rowUsed[i][val] = true;
+      colUsed[j][val] = true;
+      squareUsed[squarenumber(i,j)][val] = true;
+   }
+}
 // check if solved
 bool board::isSolved()
 {
