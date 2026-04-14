@@ -203,7 +203,7 @@ void board::setCell(int i, int j, int val)
       value[i][j] = val;
       rowUsed[i][val] = true;
       colUsed[j][val] = true;
-      squareUsed[squarenumber(i,j)][val] = true;
+      squareUsed[squareNumber(i,j)][val] = true;
    }
 }
 // check if solved
