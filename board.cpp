@@ -361,11 +361,18 @@ int main()
          b1.initialize(fin);
          b1.print();
          b1.printConflicts();
-
-         if (b1.isSolved())
-            cout << "Board is solved.\n";
+         long calls = 0; //keeps track of num of calls
+         
+         if (b1.solve(calls)) //try to solve the board
+         {
+             cout << "Solved board:\n";
+             b1.print();
+         }
          else
-            cout << "Board is not solved.\n";
+         {
+             cout << "No solution found.\n";
+         }
+         cout << "Recursive calls: " << calls << endl; //print how many recursive calls were used
       }
    }
    catch (indexRangeError &ex)
