@@ -283,7 +283,14 @@ void board::printConflicts()
       cout << "---";
    cout << "-\n";
 }
-
+bool board::valid_Num(int value, int i, int j){
+   if (rowUsed[i][value] || colUsed[j][value] || squareUsed[squareNumber(i,j)][value]){
+      return false;
+   }
+   else{
+      return true;
+   }
+}
 bool board::isSolved()
 // solved = no blanks AND no conflicts
 {
