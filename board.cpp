@@ -51,6 +51,7 @@ class board
       void setCell(int, int, ValueType);
       void clearCell(int, int);
       bool isSolved();
+      bool findBlank(int &row, int &col);
 
    private:
       matrix<ValueType> value; // actual board values
@@ -300,6 +301,22 @@ bool board::isSolved()
             return false;
 
    return true;
+}
+bool board::findBlank(int &row, int &col)
+{
+   for (int i = 1; i <= BoardSize; i++)
+   {
+      for (int j = 1; j <= BoardSize; j++)
+      {
+         if (value[i][j] == Blank)
+         {
+            row = i;
+            col = j;
+            return true;
+         }
+      }
+   }
+   return false; // no blanks left
 }
 
 int main()
