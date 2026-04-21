@@ -52,6 +52,7 @@ class board
       void clearCell(int, int);
       bool isSolved();
       bool findBlank(int &row, int &col);
+      bool solve(long &calls);
 
    private:
       matrix<ValueType> value; // actual board values
@@ -317,6 +318,25 @@ bool board::findBlank(int &row, int &col)
       }
    }
    return false; // no blanks left
+}
+bool board::solve(long &calls)
+{
+    calls++; //recursive call
+    if (isSolved()) //is puzzle already solved
+        return true;
+    int row, col; 
+    findBlank(row, col); //find next blank cell to fill
+    for (int val = MinValue; val <= MaxValue; val++) //try all possible values for this blank cell
+    {
+        if (valid_Num(val, row, col)) //check if val placement is legal
+        {
+            setCell(row, col, val); //place the value in the cell
+            if (solve(calls)) //recursively attempt to solve the rest of the board
+                return true; //stop if completed
+            clearCell(row, col); //backtrack if placement is not legal
+        }
+    }
+    return false; //tells previous recursive call to backtrack
 }
 
 int main()
