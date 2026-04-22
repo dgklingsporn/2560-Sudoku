@@ -11,7 +11,6 @@ board.cpp
 
 */
 
-
 #include <iostream>
 #include <limits.h>
 #include "d_ matrix.h"
@@ -52,7 +51,8 @@ class board
       void clearCell(int, int);
       bool isSolved();
       bool findBlank(int &row, int &col);
-      bool solve(long &calls);
+      bool valid_Num(int val, int i, int j);
+      bool solve(long long &calls);
 
    private:
       matrix<ValueType> value; // actual board values
@@ -285,14 +285,15 @@ void board::printConflicts()
       cout << "---";
    cout << "-\n";
 }
-bool board::valid_Num(int value, int i, int j){
-   if (rowUsed[i][value] || colUsed[j][value] || squareUsed[squareNumber(i,j)][value]){
+
+bool board::valid_Num(int val, int i, int j)
+{
+   if (rowUsed[i][val] || colUsed[j][val] || squareUsed[squareNumber(i,j)][val])
       return false;
-   }
-   else{
+   else
       return true;
-   }
 }
+
 bool board::isSolved()
 // solved = no blanks AND no conflicts
 {
@@ -303,40 +304,64 @@ bool board::isSolved()
 
    return true;
 }
+
 bool board::findBlank(int &row, int &col)
 {
+   int bestCount = 10;
+   bool found = false;
+
    for (int i = 1; i <= BoardSize; i++)
    {
       for (int j = 1; j <= BoardSize; j++)
       {
          if (value[i][j] == Blank)
          {
-            row = i;
-            col = j;
-            return true;
+            int count = 0;
+
+            for (int val = MinValue; val <= MaxValue; val++)
+               if (valid_Num(val, i, j))
+                  count++;
+
+            if (count < bestCount)
+            {
+               bestCount = count;
+               row = i;
+               col = j;
+               found = true;
+            }
+
+            if (bestCount == 1)
+               return true;
          }
       }
    }
-   return false; // no blanks left
+
+   return found;
 }
-bool board::solve(long &calls)
+
+bool board::solve(long long &calls)
 {
-    calls++; //recursive call
-    if (isSolved()) //is puzzle already solved
-        return true;
-    int row, col; 
-    findBlank(row, col); //find next blank cell to fill
-    for (int val = MinValue; val <= MaxValue; val++) //try all possible values for this blank cell
-    {
-        if (valid_Num(val, row, col)) //check if val placement is legal
-        {
-            setCell(row, col, val); //place the value in the cell
-            if (solve(calls)) //recursively attempt to solve the rest of the board
-                return true; //stop if completed
-            clearCell(row, col); //backtrack if placement is not legal
-        }
-    }
-    return false; //tells previous recursive call to backtrack
+   calls++; // recursive call
+
+   int row, col;
+
+   if (!findBlank(row, col))
+      return true; // no blanks left
+
+   for (int val = MinValue; val <= MaxValue; val++)
+   {
+      if (valid_Num(val, row, col))
+      {
+         setCell(row, col, val);
+
+         if (solve(calls))
+            return true;
+
+         clearCell(row, col); // backtrack
+      }
+   }
+
+   return false;
 }
 
 int main()
@@ -355,24 +380,38 @@ int main()
    try
    {
       board b1(SquareSize);
+      long long totalCalls = 0;
+      int boardCount = 0;
 
       while (fin && fin.peek() != 'Z')
       {
          b1.initialize(fin);
+         boardCount++;
+
+         cout << "Original board:\n";
          b1.print();
-         b1.printConflicts();
-         long calls = 0; //keeps track of num of calls
-         
-         if (b1.solve(calls)) //try to solve the board
+
+         long long calls = 0;
+
+         if (b1.solve(calls))
          {
-             cout << "Solved board:\n";
-             b1.print();
+            cout << "Solved board:\n";
+            b1.print();
          }
          else
          {
-             cout << "No solution found.\n";
+            cout << "No solution found.\n";
          }
-         cout << "Recursive calls: " << calls << endl; //print how many recursive calls were used
+
+         cout << "Recursive calls: " << calls << endl << endl;
+         totalCalls += calls;
+      }
+
+      if (boardCount > 0)
+      {
+         cout << "Total recursive calls: " << totalCalls << endl;
+         cout << "Average recursive calls: "
+              << (double) totalCalls / boardCount << endl;
       }
    }
    catch (indexRangeError &ex)
